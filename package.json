@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "axios": "^1.12.2",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  },
+  "scripts": {
+    "start": "bun index.js",
+    "dev": "nodemon index.ts"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3"
+  }
+}

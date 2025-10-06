@@ -13,7 +13,7 @@ const formatDate = (d) => {
   const yyyy = date.getFullYear();
   const mm = pad(date.getMonth() + 1);
   const dd = pad(date.getDate());
-  return `${yyyy}${mm}${dd}`; // YYYYMMDD
+  return `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD
 };
 
 const formatTime = (d) => {
@@ -21,7 +21,7 @@ const formatTime = (d) => {
   const hh = pad(date.getHours());
   const mm = pad(date.getMinutes());
   const ss = pad(date.getSeconds());
-  return `${hh}${mm}${ss}`; // HHMMSS
+  return `${hh}-${mm}-${ss}`; // HHMMSS
 };
 
 const toMoney = (v, decimals = 2) =>
@@ -59,9 +59,9 @@ const transformToIntegraFormat = (payments) => {
     const PAYMENT_STATUS = "SALES";
     const INV_AMT = +payment.total || 0;
     const TAX_AMT = +payment.tax || 0;
+    const SERVICE_CHARGE_AMT = payment.serviceCharge || 0;
     const RET_AMT = 0;
-    const DISCOUNT =
-      Number.isFinite(+payment.discount) ? +payment.discount : 0;
+    const DISCOUNT = Number.isFinite(+payment.discount) ? +payment.discount : 0;
 
     const ItemDetail = (payment.billItems || []).map((item) => {
       const itemTax = calculateItemTax(item, payment);
@@ -116,6 +116,11 @@ const transformToIntegraFormat = (payments) => {
       INV_AMT: toMoney(INV_AMT, 2),
       TAX_AMT: toMoney(TAX_AMT, 2),
       RET_AMT: toMoney(RET_AMT, 2),
+      SERVICE_CHARGE_AMT: toMoney(SERVICE_CHARGE_AMT, 2),
+      PACKAGING_AMT: "0.00",
+      DELIVERY_AMT: "0.00",
+      SALE_TYPE: "DINE-IN",
+
       TRAN_STATUS,
       OP_CUR,
       BC_EXCH: toMoney(EXCHANGE, 3),
@@ -133,7 +138,8 @@ app.get("/", (req, res) => {
   res.json({
     message: "Hipalz POS Integra API is running ✅",
     endpoints: {
-      transactions: "/api/transactions?from=YYYYMMDD&to=YYYYMMDD&token=YOUR_TOKEN",
+      transactions:
+        "/api/transactions?from=YYYYMMDD&to=YYYYMMDD&token=YOUR_TOKEN",
     },
   });
 });
@@ -157,28 +163,17 @@ app.get("/api/transactions", async (req, res) => {
         .json({ message: "'from' date cannot be greater than 'to' date" });
     }
 
-    
-
     const payment = await axios.get(
-      `https://api.test.hipalz.com/script/path_finder_test?businessId=66a25e423318398937eb87f9&from=${from}&to=${to}&token=${token}`
+      `http://localhost:4500/script/path_finder_test?businessId=66a25e423318398937eb87f9&from=${from}&to=${to}&token=${token}`
     );
-
 
     const integraData = transformToIntegraFormat(payment.data.data);
 
     res.setHeader("Content-Type", "application/json");
     res.json(integraData);
-  } catch (err) {
-   
-  }
+  } catch (err) {}
 });
 
-      // ❌ REMOVE app.listen() for Vercel
-      // ✅ Instead export the app for Vercel serverless
-      module.exports = app;
-
-
-      // app.listen(3000, () => {
-      //   console.log("Server is running on port 3000");
-      // });
-    
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});

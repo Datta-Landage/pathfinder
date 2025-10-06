@@ -149,24 +149,36 @@ app.get("/api/transactions", async (req, res) => {
       return res.status(403).json({ message: "Invalid token" });
     }
 
+    const fromDate = Number(from);
+    const toDate = Number(to);
+    if (fromDate > toDate) {
+      return res
+        .status(400)
+        .json({ message: "'from' date cannot be greater than 'to' date" });
+    }
+
+    
+
     const payment = await axios.get(
       `https://api.test.hipalz.com/script/path_finder_test?businessId=66a25e423318398937eb87f9&from=${from}&to=${to}&token=${token}`
     );
 
-    console.log("Fetched payment data:", payment.data.data);
+
     const integraData = transformToIntegraFormat(payment.data.data);
 
     res.setHeader("Content-Type", "application/json");
     res.json(integraData);
   } catch (err) {
-    console.error("Error fetching transactions:", err.message);
-    res.status(500).json({
-      message: "Internal Server Error",
-      error: err.message,
-    });
+   
   }
 });
 
-// ❌ REMOVE app.listen() for Vercel
-// ✅ Instead export the app for Vercel serverless
-module.exports = app;
+      // ❌ REMOVE app.listen() for Vercel
+      // ✅ Instead export the app for Vercel serverless
+      module.exports = app;
+
+
+      // app.listen(3000, () => {
+      //   console.log("Server is running on port 3000");
+      // });
+    

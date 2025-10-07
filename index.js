@@ -164,7 +164,7 @@ app.get("/api/transactions", async (req, res) => {
     }
 
     const payment = await axios.get(
-      `http://localhost:4500/script/path_finder_test?businessId=66a25e423318398937eb87f9&from=${from}&to=${to}&token=${token}`
+      `https://api.test.hipalz.com/script/path_finder_test?businessId=66a25e423318398937eb87f9&from=${from}&to=${to}&token=${token}`
     );
 
     const integraData = transformToIntegraFormat(payment.data.data);
